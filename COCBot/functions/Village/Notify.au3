@@ -487,6 +487,11 @@ Func NotifyRemoteControlProc($OnlyPB)
 							$txtHelp &= "\n" & GetTranslated(620,1, -1) & " <" & $NotifyOrigin & "> " & GetTranslated(620,43,"HIBERNATE") & GetTranslated(620,44, " - Hibernate host PC")
 							$txtHelp &= "\n" & GetTranslated(620,1, -1) & " <" & $NotifyOrigin & "> " & GetTranslated(620,46,"SHUTDOWN") & GetTranslated(620,48, " - Shut down host PC")
 							$txtHelp &= "\n" & GetTranslated(620,1, -1) & " <" & $NotifyOrigin & "> " & GetTranslated(620,50,"STANDBY") & GetTranslated(620,51, " - Standby host PC")
+							$txtHelp &= '\n' & GetTranslated(620,1, -1) & " ACC <account list>  - set <account list> as new play list"
+							$txtHelp &= '\n' & GetTranslated(620,1, -1) & " ADD <acc number> - add account <acc number> to play list"
+							$txtHelp &= '\n' & GetTranslated(620,1, -1) & " REM <acc number> - remove account <acc number> from play list"
+							$txtHelp &= '\n' & GetTranslated(620,1, -1) & " MAP <acc number>-<profile number> - set profile <profile number> to account <acc number>. eg: BOT MAP 1-3"
+							$txtHelp &= '\n' & GetTranslated(620,1, -1) & " MODE <mode ID> - set switching mode. Eg: BOT MODE 0"
 							$txtHelp &= '\n'
 							$txtHelp &= '\n' & GetTranslated(620,98, "Examples:")
 							$txtHelp &= '\n' & GetTranslated(620,1, -1) & " " & $NotifyOrigin & " " & GetTranslated(620,17,"STATS")
@@ -631,14 +636,75 @@ Func NotifyRemoteControlProc($OnlyPB)
 							SetLog(GetTranslated(620,700,"Notify PushBullet") & ": " & GetTranslated(620,702,"Your request has been received from ") & $NotifyOrigin & ". " & GetTranslated(620,723,"Standby PC"), $COLOR_GREEN)
 							NotifyPushToPushBullet(GetTranslated(620,52,"PC Standby sequence initiated"))
 							Shutdown(32)
-						Case Else
-								Local $lenstr = StringLen(GetTranslated(620,1, -1) & " " & StringUpper($NotifyOrigin) & " " & "")
-								Local $teststr = StringLeft($body[$x], $lenstr)
-								If $teststr = (GetTranslated(620,1, -1) & " " & StringUpper($NotifyOrigin) & " " & "") Then
-									SetLog(GetTranslated(620,700,"Notify PushBullet") & ": " & GetTranslated(620,724,"received command syntax wrong, command ignored."), $COLOR_RED)
-									NotifyPushToPushBullet($NotifyOrigin & " | " & GetTranslated(620,97, "Command not recognized") & "\n" & GetTranslated(620,99, "Please push BOT HELP to obtain a complete command list."))
-									NotifyDeleteMessageFromPushBullet($iden[$x])
-								EndIf
+						Case Else 
+						; Chalicucu SWitch CoC Account
+						Local $lsNewOrd
+						If StringLeft($body[$x], 7) = "BOT ACC" Then		;Chalicucu order switch COC Account
+							$lsNewOrd = ReorderAcc(StringMid($body[$x], 9))
+							_PushToPushBullet("Reordered COC account: " & $lsNewOrd & " (" & AccGetStep() & ")")
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf StringLeft($body[$x], 7) = "BOT PRO" Then		;Chalicucu order switch bot profile
+							$lsNewOrd = ReorderCurPro(StringMid($body[$x], 9))
+							_PushToPushBullet("Reordered bot profile: " & $lsNewOrd )
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf StringLeft($body[$x], 10) = "BOT ALLPRO" Then		;Chalicucu order switch bot profile
+							$lsNewOrd = ReorderAllPro(StringMid($body[$x], 12))
+							_PushToPushBullet("Reordered bot profile for all acc: " & $lsNewOrd )
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf StringLeft($body[$x], 7) = "BOT MAP" Then		;Chalicucu Mapping Account & Profile
+							MapAccPro(StringMid($body[$x], 9))
+							_PushToPushBullet("Mapping success: " & StringMid($body[$x], 9) )
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf $body[$x] = "BOT GETORDER" Then		;Chalicucu inquiry acc order
+							SetLog("Get order: [" & $body[$x] & "]", $COLOR_RED)
+							_PushToPushBullet("Ordered COC acc: " & AccGetOrder() & " (" & AccGetStep() _
+												& ")\nCurrent:  " & $nCurCOCAcc _
+												& "\nBot profile: " & ProGetOrderName() _
+												& "\nSwitch Mode: " & $iSwitchMode & " - " & GUICtrlRead($cmbSwitchMode))
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf StringLeft($body[$x], 7) = "BOT ADD" Then		;Chalicucu Add Account to Playing list
+							$lsNewOrd = AddAcc(StringMid($body[$x], 9))
+							_PushToPushBullet($lsNewOrd)
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf StringLeft($body[$x], 7) = "BOT REM" Then		;Chalicucu Remove Account from Playing list
+							$lsNewOrd = RemAcc(StringMid($body[$x], 9))
+							_PushToPushBullet($lsNewOrd)
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf StringLeft($body[$x], 8) = "BOT MODE" Then		;Chalicucu Change Switching Mode
+							$lsNewOrd = SwitchMode(StringMid($body[$x], 10))
+							SetLog($lsNewOrd, $COLOR_RED)
+							_PushToPushBullet($lsNewOrd)
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf $body[$x] = "BOT HIDE" Then		;Chalicucu Hide emulator
+							myHide()
+							SetLog("Receive hide emulator", $COLOR_RED)
+							_PushToPushBullet("Received hide emulator")
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf $body[$x] = "BOT STOPSTART" Then		;Chalicucu Stop then start again
+							btnStop()
+							btnStart()
+							SetLog("Receive STOPSTART", $COLOR_RED)
+							_PushToPushBullet("Received STOPSTART")
+							_DeleteMessageOfPushBullet($iden[$x])
+						ElseIf StringLeft($body[$x],8) = "BOT ATKP" Then	;Chalicucu Option to enable/disable Attack Plan
+							$iChkAtkPln = (Number(StringMid($body[$x],10))=1)
+							IniWrite($profile, "switchcocacc" , "CheckAtkPln" , Number(StringMid($body[$x],10)))
+							If $iChkAtkPln Then
+								GUICtrlSetState($chkAtkPln, $GUI_CHECKED)
+								_PushToPushBullet("Enabled attack scheduler!")
+							Else
+								GUICtrlSetState($chkAtkPln, $GUI_UNCHECKED)
+								_PushToPushBullet("Disabled attack scheduler!")
+							EndIf
+							_DeleteMessageOfPushBullet($iden[$x])
+						EndIf
+							Local $lenstr = StringLen(GetTranslated(620,1, -1) & " " & StringUpper($NotifyOrigin) & " " & "")
+							Local $teststr = StringLeft($body[$x], $lenstr)
+							If $teststr = (GetTranslated(620,1, -1) & " " & StringUpper($NotifyOrigin) & " " & "") Then
+								SetLog(GetTranslated(620,700,"Notify PushBullet") & ": " & GetTranslated(620,724,"received command syntax wrong, command ignored."), $COLOR_RED)
+								NotifyPushToPushBullet($NotifyOrigin & " | " & GetTranslated(620,97, "Command not recognized") & "\n" & GetTranslated(620,99, "Please push BOT HELP to obtain a complete command list."))
+								NotifyDeleteMessageFromPushBullet($iden[$x])
+							EndIf
 					EndSwitch
 					$body[$x] = ""
 					$iden[$x] = ""
