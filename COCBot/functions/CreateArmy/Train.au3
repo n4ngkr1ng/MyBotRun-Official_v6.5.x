@@ -166,6 +166,11 @@ Func Train()
 	If _Sleep($iDelayRunBot6) Then Return ; wait for window to open
 	If Not (IsTrainPage()) Then Return ; exit if I'm not in train page
 
+	;Chalicucu get remain train time
+	$iRemainTrainTime = RemainTrainTime(True, False, False)
+	SetLog("Training remain: " & $iRemainTrainTime & " minute(s)", $COLOR_GREEN)
+	SetCurTrainTime($iRemainTrainTime)
+	
 	checkArmyCamp()
 	checkAttackDisable($iTaBChkIdle) ; Check for Take-A-Break after opening train page
 
