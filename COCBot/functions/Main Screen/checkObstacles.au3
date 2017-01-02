@@ -36,6 +36,13 @@ Func _checkObstacles() ;Checks if something is in the way for mainscreen
 	Local $msg, $x, $y, $result
 	$MinorObstacle = False
 
+	;Chalicucu click Cancel Button while load other village
+	; If _ColorCheck(_GetPixelColor(443, 430, True), Hex(4284390935, 6), 20) Then
+	If _GetPixelColor(443, 430, True) = Hex(4284390935, 6) Then
+		PureClick(383, 430, 1, 0, "Click Cancel")      ;Click Cancel
+		If _Sleep(250) Then Return
+	EndIf
+
 	_CaptureRegion()
 	_CaptureRegion2Sync() ; share same image from _CaptureRegion()
 
