@@ -124,6 +124,7 @@
 #include "functions\CreateArmy\Train.au3"
 #include "functions\CreateArmy\TrainRevamp.au3"
 #include "functions\CreateArmy\TrainIt.au3"
+#include "functions\CreateArmy\RemainTrainTime.au3"	;chalicucu add
 
 #include "functions\Image Search\ImageSearch.au3"
 #include "functions\Image Search\checkDeadBase.au3"
@@ -286,6 +287,7 @@
 #include "functions\Village\GetVillageSize.au3"
 #include "functions\Village\GainCost.au3"
 #include "functions\Village\ConvertOCRTime.au3"
+#include "functions\Village\SwitchCOCAcc.au3"	; Chalicucu Switch COC account
 #include "functions\Other\ClickZoneR.au3"
 
 #include "functions\Other\Api.au3"
