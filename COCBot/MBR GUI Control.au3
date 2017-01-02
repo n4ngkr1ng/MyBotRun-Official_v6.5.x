@@ -484,6 +484,22 @@ Func GUIControl_WM_COMMAND($hWind, $iMsg, $wParam, $lParam)
 			btnTestRequestCC()
 		Case $btnTestAttackBar
 			btnTestAttackBar()
+		Case $txtTotalCoCAcc			;chalicucu
+			Switch $nNotifyCode
+				Case $EN_KILLFOCUS
+					SetLog("[Total account config]")
+					ReCfgTotalAcc(Int(GUICtrlRead($txtTotalCoCAcc)))
+			EndSwitch
+				Case $txtAccBottingOrder		;chalicucu: reorder switch acc
+					If $nNotifyCode = $EN_KILLFOCUS Then 
+						SetLog("[Account order config]")
+						ReorderAcc(GUICtrlRead($txtAccBottingOrder), True)
+					EndIf
+				Case $txtProfileIdxOrder		;chalicucu: reorder profile for acc
+					If $nNotifyCode = $EN_KILLFOCUS Then 
+						SetLog("[Profile config]")
+						ReorderAllPro(GUICtrlRead($txtProfileIdxOrder), True)
+					EndIf
 		Case $btnTestClickDrag
 			btnTestClickDrag()
 		Case $btnTestImage
